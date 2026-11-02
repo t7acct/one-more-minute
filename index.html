@@ -11,14 +11,20 @@
   <header><a class="brand" href="./"><span class="brand-mark" aria-hidden="true">⌁</span> One More Minute</a><span class="edition">A walking experiment in Bloomsbury</span><a href="https://github.com/t7acct/one-more-minute">View source ↗</a></header>
   <main>
     <section class="planner" aria-labelledby="title">
-      <div class="intro"><p class="location">London, on foot</p><h1>Different ways home.<br>A little longer together.</h1><p>Find a shared walk before you go your separate ways.</p></div>
+      <div class="intro"><p class="location">London, on foot</p><h1 id="title">Different ways home.<br>A little longer together.</h1><p>Find a shared walk before you go your separate ways.</p></div>
       <form id="planner">
         <label for="start">Leaving from</label><select id="start" name="start" disabled></select>
         <div class="destination-grid"><div><label for="a"><span class="dot person-a"></span> You’re going to</label><select id="a" name="a" disabled></select></div><div><label for="b"><span class="dot person-b"></span> Your friend’s going to</label><select id="b" name="b" disabled></select></div></div>
-        <div class="budget-heading"><label for="budget">A little extra time?</label><output id="budget-label" for="budget">5 min each</output></div>
+        <button type="button" id="swap" class="text-button" disabled>Swap destinations ⇄</button>
+        <p class="budget-intro">How much extra walking works for you?</p>
+        <div class="budget-heading"><label for="budget">You</label><output id="budget-label" for="budget">5 min extra</output></div>
         <input id="budget" name="budget" type="range" min="0" max="10" value="5" step="1" disabled aria-describedby="budget-help">
-        <div class="range-labels"><span>Direct way home</span><span>Take the scenic route</span></div><p id="budget-help" class="help">The most extra walking either person is happy to add.</p>
-        <button type="button" id="example" disabled>Try another pair <span aria-hidden="true">↻</span></button>
+        <div class="budget-heading friend-budget"><label for="budget-b">Your friend</label><output id="budget-b-label" for="budget-b">5 min extra</output></div>
+        <input id="budget-b" name="budget-b" type="range" min="0" max="10" value="5" step="1" disabled aria-describedby="budget-help">
+        <div class="range-labels"><span>0 min</span><span>10 min</span></div><p id="budget-help" class="help">Each limit is on top of that person’s shortest walk home.</p>
+        <div class="walk-actions"><button type="button" id="example" disabled>Try another pair <span aria-hidden="true">↻</span></button><button type="button" id="share" disabled>Copy walk link</button></div>
+        <p id="share-status" role="status" class="help"></p>
+        <div id="manual-share" hidden><label for="share-link">Copy this link to send your walk</label><input id="share-link" type="text" readonly></div>
       </form>
       <section class="result" aria-live="polite" aria-atomic="true"><p id="status">Loading the streets of Bloomsbury…</p><div id="result" hidden><p class="result-label">Your walk together</p><p class="shared"><span id="shared">0</span> <span class="unit">min</span></p><p id="goodbye"></p><div class="journeys"><p><span class="dot person-a"></span> You <strong id="time-a"></strong><small id="extra-a"></small></p><p><span class="dot person-b"></span> Your friend <strong id="time-b"></strong><small id="extra-b"></small></p></div><p class="gain" id="gain"></p></div></section>
       <details><summary>How does it work?</summary><p>We try street junctions as goodbye points, using shortest paths to get there and to each destination. We choose the candidate with the most shared walking that fits both time limits, without backtracking loops.</p><p>Times assume a steady 4.9 km/h. This is a small map experiment: crossings, opening hours, accessibility and live closures aren’t modelled. Use it to explore an idea, rather than for turn-by-turn navigation.</p></details>

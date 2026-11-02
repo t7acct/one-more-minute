@@ -1,5 +1,6 @@
 import { buildGraph, dijkstra, nearestNode, planWalk } from './routing.js';
 import { places } from './places.js';
+import { readWalk, walkHash } from './walk-state.js';
 
 const $ = id => document.getElementById(id);
 const NS = 'http://www.w3.org/2000/svg';
@@ -59,14 +60,20 @@ function fitRoute() {
 }
 
 function render() {
+  $('share-status').textContent = '';
+  $('manual-share').hidden = true;
+  $('share').disabled = true;
   const start = snapped.get($('start').value), a = snapped.get($('a').value), b = snapped.get($('b').value);
   const extra = Number($('budget').value);
-  $('budget-label').value = `${extra} min each`;
+  const extraB = Number($('budget-b').value);
+  $('budget-label').value = `${extra} min extra`;
+  $('budget-b-label').value = `${extraB} min extra`;
+  const budgetKey = `${extra}/${extraB}`;
   const key = `${start}/${a}/${b}`;
   try {
     if (key !== lastKey) { cache = new Map(); baseline = planWalk(graph, start, a, b, 0); lastKey = key; }
-    if (!cache.has(extra)) cache.set(extra, planWalk(graph, start, a, b, extra));
-    const result = cache.get(extra);
+    if (!cache.has(budgetKey)) cache.set(budgetKey, planWalk(graph, start, a, b, extra, extraB));
+    const result = cache.get(budgetKey);
     if (!result) throw new Error('No route found. Try another pair of destinations.');
     lastResult = result;
     $('routes').replaceChildren(); $('markers').replaceChildren();
@@ -82,11 +89,11 @@ function render() {
     $('extra-a').textContent = `${mins(result.extraA)} min extra walking`;
     $('extra-b').textContent = `${mins(result.extraB)} min extra walking`;
     const gain = Math.max(0, result.shared - (baseline?.shared ?? 0));
-    $('gain').textContent = gain > 1 ? `${mins(gain)} more minutes together than the direct-route plan.` : 'This pair already shares as much of the walk as this time limit allows.';
+    $('gain').textContent = gain > 1 ? `${mins(gain)} more minutes together than going straight home.` : 'No extra time together with these limits. Try another pair or add a minute.';
     $('map-desc').textContent = `${mins(result.shared)} minutes together. Your journey: ${mins(result.timeA)} minutes; your friend’s: ${mins(result.timeB)} minutes. ${$('goodbye').textContent}`;
     $('status').hidden = true; $('result').hidden = false;
-    const params = new URLSearchParams({ start: $('start').value, a: $('a').value, b: $('b').value, extra: String(extra) });
-    history.replaceState(null, '', `#${params}`);
+    history.replaceState(null, '', walkHash({ start: $('start').value, a: $('a').value, b: $('b').value, extra, extraB }));
+    $('share').disabled = false;
     fitRoute();
   } catch (error) {
     $('result').hidden = true; $('status').hidden = false; $('status').textContent = error.message;
@@ -107,17 +114,27 @@ async function init() {
       const option = document.createElement('option'); option.value = p.id; option.textContent = p.name;
       $(id).append(option);
     }
-    const params = new URLSearchParams(location.hash.slice(1));
-    for (const [id, fallback] of [['start', 'ucl'], ['a', 'euston'], ['b', 'russell']]) {
-      $(id).value = snapped.has(params.get(id)) ? params.get(id) : fallback;
+    function restoreWalk() {
+      const state = readWalk(location.hash, new Set(snapped.keys()));
+      for (const id of ['start', 'a', 'b']) $(id).value = state[id];
+      $('budget').value = state.extra; $('budget-b').value = state.extraB;
+    }
+    restoreWalk();
+    window.addEventListener('hashchange', () => { restoreWalk(); render(); });
+    for (const id of ['start', 'a', 'b']) {
       $(id).disabled = false; $(id).addEventListener('change', render);
     }
-    const budget = Number(params.get('extra') ?? 5);
-    $('budget').value = Number.isInteger(budget) && budget >= 0 && budget <= 10 ? budget : 5;
-    $('budget').disabled = false; $('example').disabled = false;
+    for (const id of ['budget', 'budget-b']) $(id).disabled = false;
+    $('example').disabled = false;
+    $('swap').disabled = false;
+    $('swap').addEventListener('click', () => {
+      const destination = $('a').value;
+      $('a').value = $('b').value; $('b').value = destination;
+      render();
+    });
     let timer;
-    $('budget').addEventListener('input', () => {
-      $('budget-label').value = `${$('budget').value} min each`;
+    for (const id of ['budget', 'budget-b']) $(id).addEventListener('input', () => {
+      $(`${id}-label`).value = `${$(id).value} min extra`;
       clearTimeout(timer); timer = setTimeout(render, 60);
     });
     $('planner').addEventListener('submit', e => e.preventDefault());
@@ -125,9 +142,21 @@ async function init() {
     let example = 0;
     $('example').addEventListener('click', () => {
       const pair = examples[example++ % examples.length];
-      $('start').value = 'ucl'; $('a').value = pair[0]; $('b').value = pair[1]; $('budget').value = 5; render();
+      $('start').value = 'ucl'; $('a').value = pair[0]; $('b').value = pair[1]; $('budget').value = 5; $('budget-b').value = 5; render();
     });
     $('reset').addEventListener('click', fitRoute);
+    $('share').addEventListener('click', async () => {
+      const url = location.href;
+      try {
+        await navigator.clipboard.writeText(url);
+        $('share-status').textContent = 'Link copied. Send it to your walking buddy.';
+      } catch {
+        $('share-link').value = url;
+        $('manual-share').hidden = false;
+        $('share-link').focus(); $('share-link').select();
+        $('share-status').textContent = 'Copy the link below. It includes both time limits.';
+      }
+    });
     render();
   } catch (error) {
     $('status').textContent = `${error.message} To run locally, use npm start and open http://localhost:4173.`;

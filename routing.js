@@ -59,8 +59,10 @@ export function pathTo(tree, target) {
  * Maximise shared walking time subject to each person's extra-time budget.
  * Reject repeated vertices. This candidate search is not a global longest-simple-path solver.
  */
-export function planWalk(graph, start, destinationA, destinationB, extraMinutes = 0) {
-  if (!Number.isFinite(extraMinutes) || extraMinutes < 0) throw new Error('Extra time must be non-negative.');
+export function planWalk(graph, start, destinationA, destinationB, extraMinutes = 0, extraMinutesB = extraMinutes) {
+  if (![extraMinutes, extraMinutesB].every(value => Number.isFinite(value) && value >= 0)) {
+    throw new Error('Extra time must be non-negative.');
+  }
   const s = dijkstra(graph, start), a = dijkstra(graph, destinationA), b = dijkstra(graph, destinationB);
   const directA = s.distance.get(destinationA), directB = s.distance.get(destinationB);
   if (directA === undefined || directB === undefined) throw new Error('Choose destinations connected to the starting point.');
@@ -68,7 +70,7 @@ export function planWalk(graph, start, destinationA, destinationB, extraMinutes 
   for (const [meeting, shared] of s.distance) {
     const timeA = shared + (a.distance.get(meeting) ?? Infinity);
     const timeB = shared + (b.distance.get(meeting) ?? Infinity);
-    if (timeA > directA + extraMinutes * 60 + 1e-7 || timeB > directB + extraMinutes * 60 + 1e-7) continue;
+    if (timeA > directA + extraMinutes * 60 + 1e-7 || timeB > directB + extraMinutesB * 60 + 1e-7) continue;
     if (best && shared < best.shared - 1e-7) continue;
     const together = pathTo(s, meeting);
     const tailA = pathTo(a, meeting).reverse(), tailB = pathTo(b, meeting).reverse();

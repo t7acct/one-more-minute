@@ -37,6 +37,21 @@ test('walking out and back does not inflate time together', () => {
   assert.equal(new Set(plan.routeA).size, plan.routeA.length);
   assert.equal(new Set(plan.routeB).size, plan.routeB.length);
 });
+test('each person has their own detour limit', () => {
+  const graph = makeGraph([['s','m',60], ['m','a',60], ['m','b',60], ['s','a',120], ['s','b',90]]);
+  const blocked = planWalk(graph, 's', 'a', 'b', 0, 0);
+  const allowed = planWalk(graph, 's', 'a', 'b', 0, 0.5);
+  assert.equal(blocked.shared, 0);
+  assert.equal(allowed.shared, 60);
+  assert.equal(allowed.extraA, 0);
+  assert.equal(allowed.extraB, 30);
+  // With more time, A can walk B all the way home without delaying B.
+  const walkHome = planWalk(graph, 's', 'a', 'b', 5, 0);
+  assert.equal(walkHome.shared, 90);
+  assert.equal(walkHome.extraB, 0);
+  assert.throws(() => planWalk(graph, 's', 'a', 'b', 0, NaN), /non-negative/);
+  assert.throws(() => planWalk(graph, 's', 'a', 'b', 0, -1), /non-negative/);
+});
 test('same destination and starting at a destination work', () => {
   const graph = makeGraph([['s','m',60], ['m','a',60]]);
   assert.equal(planWalk(graph,'s','a','a',0).shared,120);
