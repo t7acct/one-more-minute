@@ -1,10 +1,18 @@
 // Keep shared links readable, and keep old links working.
-const defaults = { start: 'ucl', a: 'euston', b: 'russell', extra: 5, extraB: 5 };
+const defaults = {
+  start: 'ucl',
+  a: 'euston',
+  b: 'russell',
+  extra: 5,
+  extraB: 5,
+};
 
 function readBudget(value, fallback) {
   if (value === null || value.trim() === '') return fallback;
   const number = Number(value);
-  return Number.isInteger(number) && number >= 0 && number <= 10 ? number : fallback;
+  return Number.isInteger(number) && number >= 0 && number <= 10
+    ? number
+    : fallback;
 }
 
 export function readWalk(hash, placeIds) {

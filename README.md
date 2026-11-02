@@ -1,24 +1,24 @@
 # One More Minute
 
-**Different ways home. A little longer together.**
+You’re leaving campus with a friend. You live in different directions, but neither of you is quite ready to end the conversation.
 
-A small routing experiment: two friends leave the same place for different destinations. How much of the walk can they share if each is happy to add a few minutes?
+Pick where you’re both going and how much extra walking each of you can spare. The app finds a route to share, then shows where to split off.
 
-[**Try the live demo**](https://t7acct.github.io/one-more-minute/) · [Routing engine](routing.js) · [Tests](tests/routing.test.js)
+[Try it here](https://t7acct.github.io/one-more-minute/)
 
-![One More Minute showing a shared walk around UCL](docs/demo.png)
+![A shared walk around UCL](docs/demo.png)
 
-## Try it
+## Using it
 
-1. Pick a starting point and two destinations around UCL and Bloomsbury.
-2. Move the extra-time slider from 0 to 10 minutes per person.
-3. See the shared route, goodbye point, total journey times and each person's detour.
+Choose a starting point and two destinations around UCL. Each person gets their own extra-time slider, from 0 to 10 minutes. The totals show how long each walk takes and how much of it is a detour.
 
-The URL remembers your choices, so you can copy it to share a particular plan. The bundled map works without API keys, map-tile requests, accounts or a backend.
+Green is the shared walk. Orange is your route afterwards; the dashed blue line is your friend’s. Drag the map to look around, or use the zoom buttons. With the map focused, arrow keys move it, + and − zoom, and 0 brings the route back into view.
 
-## Run locally
+**Copy walk link** saves both destinations and time limits in the URL. No account needed.
 
-Requires Python 3 for the development server. Node.js 22+ is needed only for tests.
+## Run it locally
+
+You’ll need Python 3. There are no packages to install.
 
 ```sh
 git clone https://github.com/t7acct/one-more-minute.git
@@ -26,40 +26,39 @@ cd one-more-minute
 python3 -m http.server 4173 --bind 127.0.0.1
 ```
 
-Open **http://localhost:4173**. Alternatively, `npm start` runs the same server. There are no packages to install. Opening `index.html` directly will not work because the app fetches its local street data.
+Open [localhost:4173](http://localhost:4173). Opening the HTML file directly won’t load the street data.
+
+Tests use Node.js 22 or later:
 
 ```sh
 npm test
 ```
 
-## The interesting bit
+## How the routes work
 
-The streets form an undirected weighted graph. Edges use geographic distance divided by a fixed walking speed of 1.35 m/s (about 4.9 km/h).
+The street network is a graph. Each edge has a walking time based on its length, assuming 1.35 m/s (about 4.9 km/h).
 
-For start **S**, destinations **A** and **B**, and a proposed split point **M**, the two candidate journeys cost:
+For each possible goodbye point, the planner adds up:
 
 ```text
-person A: d(S, M) + d(M, A)
-person B: d(S, M) + d(M, B)
+your walk     = start → goodbye point → your destination
+friend’s walk = start → goodbye point → their destination
 ```
 
-Both must fit within their direct shortest-route time plus their extra-time allowance. Three Dijkstra runs, using a binary min-heap, provide the distances and paths. The planner checks candidate junctions, rejects routes with repeated vertices, counts the actual common prefix, and selects the candidate with the most shared time. Ties favour lower combined journey time.
+A route only qualifies if both people stay within their own extra-time limit. Routes that revisit a node are discarded. Of the remaining candidates, the planner picks the one with the most time together, breaking ties by the combined journey time.
 
-This is a **shortest-path candidate search**, not an exact global optimiser over every possible simple path. Equal-cost alternatives and non-shortest shared prefixes can lead to better solutions outside the candidate set. Tree construction takes `O((V + E) log V)`; candidate reconstruction adds path-length-dependent work. The browser caches results for slider settings until the destinations change.
+[routing.js](routing.js) uses three Dijkstra searches with a binary min-heap. It considers shortest paths through each candidate junction, so it can miss better routes that use a different path to the same junction. It isn’t an exact solver for every possible walk.
 
-Tests cover shortest-path relaxation, the extra-time constraint, dead-end backtracking, identical destinations, disconnected graphs, and route continuity, costs, budgets and loop avoidance on the bundled real street network.
+The tests check shortest paths, separate time limits, dead ends, identical destinations, disconnected graphs and shared links. They also check that routes on the bundled map stay connected, avoid repeated nodes and respect the time limits.
 
-## Scope of v0.1
+## What’s missing
 
-- Twelve preset places around UCL; all destinations snap to street nodes connected to the starting area's component.
-- Original SVG street rendering with solid/dashed route styles and text summaries.
-- Responsive layout and keyboard-operable native controls.
-- Static hosting, with all route calculation on your device.
+This version has 12 preset places and a fixed area around Bloomsbury. Place coordinates snap to nearby connected street nodes, so the short walk to a building entrance isn’t included. Crossing delays, gates, opening hours, accessibility and live closures aren’t accounted for either. Treat the times as estimates, not directions to follow blindly.
 
-The extract has a fixed boundary, so this is not a London-wide route planner. Snapping omits the small walk from a named place to its street node. The graph simplifies pedestrian access, ignores barriers, crossings, opening hours, live closures and accessibility, and treats retained edges as bidirectional. It is an experiment, not turn-by-turn navigation. See [data provenance and limitations](data/README.md).
+Address search and better pedestrian access data would be useful next steps.
 
-Possible next steps: address search, separate time budgets, turn instructions, better pedestrian access modelling and a broader map.
+## Map data and licence
 
-## Licence
+The map is drawn as SVG from a bundled OpenStreetMap extract. The browser calculates routes locally; it doesn’t call a routing service or download map tiles.
 
-Source code: [MIT](LICENSE). Map data: © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright), distributed under the [Open Database Licence](https://opendatacommons.org/licenses/odbl/1-0/). The data licence is separate from the code licence.
+Code is [MIT licensed](LICENSE). Map data is © [OpenStreetMap contributors](https://www.openstreetmap.org/copyright), under the [Open Database Licence](https://opendatacommons.org/licenses/odbl/1-0/). [Data notes](data/README.md) include the query and filtering rules.

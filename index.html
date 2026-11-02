@@ -1,44 +1,190 @@
 <!doctype html>
 <html lang="en-GB">
-<head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#244d46">
-  <meta name="description" content="Different destinations. A little more of the walk together. Explore shared walks around UCL and Bloomsbury.">
-  <title>One More Minute — walk a little longer together</title>
-  <link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css">
-</head>
-<body>
-  <header><a class="brand" href="./"><span class="brand-mark" aria-hidden="true">⌁</span> One More Minute</a><span class="edition">A walking experiment in Bloomsbury</span><a href="https://github.com/t7acct/one-more-minute">View source ↗</a></header>
-  <main>
-    <section class="planner" aria-labelledby="title">
-      <div class="intro"><p class="location">London, on foot</p><h1 id="title">Different ways home.<br>A little longer together.</h1><p>Find a shared walk before you go your separate ways.</p></div>
-      <form id="planner">
-        <label for="start">Leaving from</label><select id="start" name="start" disabled></select>
-        <div class="destination-grid"><div><label for="a"><span class="dot person-a"></span> You’re going to</label><select id="a" name="a" disabled></select></div><div><label for="b"><span class="dot person-b"></span> Your friend’s going to</label><select id="b" name="b" disabled></select></div></div>
-        <button type="button" id="swap" class="text-button" disabled>Swap destinations ⇄</button>
-        <p class="budget-intro">How much extra walking works for you?</p>
-        <div class="budget-heading"><label for="budget">You</label><output id="budget-label" for="budget">5 min extra</output></div>
-        <input id="budget" name="budget" type="range" min="0" max="10" value="5" step="1" disabled aria-describedby="budget-help">
-        <div class="budget-heading friend-budget"><label for="budget-b">Your friend</label><output id="budget-b-label" for="budget-b">5 min extra</output></div>
-        <input id="budget-b" name="budget-b" type="range" min="0" max="10" value="5" step="1" disabled aria-describedby="budget-help">
-        <div class="range-labels"><span>0 min</span><span>10 min</span></div><p id="budget-help" class="help">Each limit is on top of that person’s shortest walk home.</p>
-        <div class="walk-actions"><button type="button" id="example" disabled>Try another pair <span aria-hidden="true">↻</span></button><button type="button" id="share" disabled>Copy walk link</button></div>
-        <p id="share-status" role="status" class="help"></p>
-        <div id="manual-share" hidden><label for="share-link">Copy this link to send your walk</label><input id="share-link" type="text" readonly></div>
-        <button id="show-map" type="button" class="text-button mobile-map-link">Show the walk on the map ↓</button>
-      </form>
-      <section class="result" aria-live="polite" aria-atomic="true"><p id="status">Loading the streets of Bloomsbury…</p><div id="result" hidden><p class="result-label">Your walk together</p><p class="shared"><span id="shared">0</span> <span class="unit">min</span></p><p id="goodbye"></p><div class="journeys"><p><span class="dot person-a"></span> You <strong id="time-a"></strong><small id="extra-a"></small></p><p><span class="dot person-b"></span> Your friend <strong id="time-b"></strong><small id="extra-b"></small></p></div><p class="gain" id="gain"></p></div></section>
-      <details><summary>How does it work?</summary><p>We try street junctions as goodbye points, using shortest paths to get there and to each destination. We choose the candidate with the most shared walking that fits both time limits, without backtracking loops.</p><p>Times assume a steady 4.9 km/h. This is a small map experiment: crossings, opening hours, accessibility and live closures aren’t modelled. Use it to explore an idea, rather than for turn-by-turn navigation.</p></details>
-    </section>
-    <section class="map-panel" aria-label="Walking route map">
-      <div class="map-top"><span><span class="live-dot"></span> Bloomsbury & surrounding streets</span><button id="reset" type="button">Fit route</button></div>
-      <svg id="map" viewBox="0 0 1000 900" tabindex="0" role="img" aria-labelledby="map-title map-desc" aria-describedby="map-help"><title id="map-title">Shared walking route in central London</title><desc id="map-desc">Loading street map.</desc><g id="streets"></g><g id="labels"></g><g id="routes"></g><g id="markers"></g></svg>
-      <div class="map-zoom" role="group" aria-label="Map zoom"><button id="zoom-in" type="button" aria-label="Zoom in">+</button><button id="zoom-out" type="button" aria-label="Zoom out">−</button></div>
-      <p id="map-help" class="map-help">Drag to move. Use + / − to zoom, or arrow keys when the map has focus. Press 0 to fit your route.</p>
-      <div class="map-bottom"><div class="legend"><span><i class="line together"></i> Together</span><span><i class="line you"></i> You</span><span><i class="line friend"></i> Your friend</span></div><p>Map data © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> · ODbL</p></div>
-    </section>
-  </main>
-  <footer><span>For the conversation you’re not quite ready to end.</span><span>v0.1 · London demo · No accounts, no tracking</span></footer>
-  <script type="module" src="./app.js"></script>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#244d46" />
+    <meta
+      name="description"
+      content="Different destinations. A little more of the walk together. Explore shared walks around UCL and Bloomsbury."
+    />
+    <title>One More Minute — walk a little longer together</title>
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header>
+      <a class="brand" href="./"
+        ><span class="brand-mark" aria-hidden="true">⌁</span> One More Minute</a
+      ><span class="edition">A walking experiment in Bloomsbury</span
+      ><a href="https://github.com/t7acct/one-more-minute">View source ↗</a>
+    </header>
+    <main>
+      <section class="planner" aria-labelledby="title">
+        <div class="intro">
+          <p class="location">London, on foot</p>
+          <h1 id="title">
+            Different ways home.<br />A little longer together.
+          </h1>
+          <p>Find a shared walk before you go your separate ways.</p>
+        </div>
+        <form id="planner">
+          <label for="start">Leaving from</label
+          ><select id="start" name="start" disabled></select>
+          <div class="destination-grid">
+            <div>
+              <label for="a"
+                ><span class="dot person-a"></span> You’re going to</label
+              ><select id="a" name="a" disabled></select>
+            </div>
+            <div>
+              <label for="b"
+                ><span class="dot person-b"></span> Your friend’s going
+                to</label
+              ><select id="b" name="b" disabled></select>
+            </div>
+          </div>
+          <button type="button" id="swap" class="text-button" disabled>
+            Swap destinations ⇄
+          </button>
+          <p class="budget-intro">How much extra walking works for you?</p>
+          <div class="budget-heading">
+            <label for="budget">You</label
+            ><output id="budget-label" for="budget">5 min extra</output>
+          </div>
+          <input
+            id="budget"
+            name="budget"
+            type="range"
+            min="0"
+            max="10"
+            value="5"
+            step="1"
+            disabled
+            aria-describedby="budget-help"
+          />
+          <div class="budget-heading friend-budget">
+            <label for="budget-b">Your friend</label
+            ><output id="budget-b-label" for="budget-b">5 min extra</output>
+          </div>
+          <input
+            id="budget-b"
+            name="budget-b"
+            type="range"
+            min="0"
+            max="10"
+            value="5"
+            step="1"
+            disabled
+            aria-describedby="budget-help"
+          />
+          <div class="range-labels"><span>0 min</span><span>10 min</span></div>
+          <p id="budget-help" class="help">
+            Each limit is on top of that person’s shortest walk home.
+          </p>
+          <div class="walk-actions">
+            <button type="button" id="example" disabled>
+              Try another pair <span aria-hidden="true">↻</span></button
+            ><button type="button" id="share" disabled>Copy walk link</button>
+          </div>
+          <p id="share-status" role="status" class="help"></p>
+          <div id="manual-share" hidden>
+            <label for="share-link">Copy this link to send your walk</label
+            ><input id="share-link" type="text" readonly />
+          </div>
+          <button
+            id="show-map"
+            type="button"
+            class="text-button mobile-map-link"
+          >
+            Show the walk on the map ↓
+          </button>
+        </form>
+        <section class="result" aria-live="polite" aria-atomic="true">
+          <p id="status">Loading the streets of Bloomsbury…</p>
+          <div id="result" hidden>
+            <p class="result-label">Your walk together</p>
+            <p class="shared">
+              <span id="shared">0</span> <span class="unit">min</span>
+            </p>
+            <p id="goodbye"></p>
+            <div class="journeys">
+              <p>
+                <span class="dot person-a"></span> You
+                <strong id="time-a"></strong><small id="extra-a"></small>
+              </p>
+              <p>
+                <span class="dot person-b"></span> Your friend
+                <strong id="time-b"></strong><small id="extra-b"></small>
+              </p>
+            </div>
+            <p class="gain" id="gain"></p>
+          </div>
+        </section>
+        <details>
+          <summary>How does it work?</summary>
+          <p>
+            The app tries street junctions as places to split off. It picks the
+            route with the most walking together that fits both time limits, and
+            skips routes that visit the same junction twice.
+          </p>
+          <p>
+            Times assume a steady 4.9 km/h. They don’t include crossing delays,
+            opening hours or closures. The map covers the area around UCL, and
+            doesn’t check whether a route is step-free.
+          </p>
+        </details>
+      </section>
+      <section class="map-panel" aria-label="Walking route map">
+        <div class="map-top">
+          <span
+            ><span class="live-dot"></span> Bloomsbury & surrounding
+            streets</span
+          ><button id="reset" type="button">Fit route</button>
+        </div>
+        <svg
+          id="map"
+          viewBox="0 0 1000 900"
+          tabindex="0"
+          role="img"
+          aria-labelledby="map-title map-desc"
+          aria-describedby="map-help"
+        >
+          <title id="map-title">Shared walking route in central London</title>
+          <desc id="map-desc">Loading street map.</desc>
+          <g id="streets"></g>
+          <g id="labels"></g>
+          <g id="routes"></g>
+          <g id="markers"></g>
+        </svg>
+        <div class="map-zoom" role="group" aria-label="Map zoom">
+          <button id="zoom-in" type="button" aria-label="Zoom in">+</button
+          ><button id="zoom-out" type="button" aria-label="Zoom out">−</button>
+        </div>
+        <p id="map-help" class="map-help">
+          Drag to move. Use + / − to zoom, or arrow keys when the map has focus.
+          Press 0 to fit your route.
+        </p>
+        <div class="map-bottom">
+          <div class="legend">
+            <span><i class="line together"></i> Together</span
+            ><span><i class="line you"></i> You</span
+            ><span><i class="line friend"></i> Your friend</span>
+          </div>
+          <p>
+            Map data ©
+            <a href="https://www.openstreetmap.org/copyright"
+              >OpenStreetMap contributors</a
+            >
+            · ODbL
+          </p>
+        </div>
+      </section>
+    </main>
+    <footer>
+      <span>For the conversation you’re not quite ready to end.</span
+      ><span>v0.2 · London demo · No accounts, no tracking</span>
+    </footer>
+    <script type="module" src="./app.js"></script>
+  </body>
 </html>

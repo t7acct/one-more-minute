@@ -1,9 +1,14 @@
 {
   "name": "one-more-minute",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "description": "Find a little more of the walk to share.",
-  "scripts": { "test": "node --test", "start": "python3 -m http.server 4173 --bind 127.0.0.1" },
-  "engines": { "node": ">=22" }
+  "scripts": {
+    "test": "node --test",
+    "start": "python3 -m http.server 4173 --bind 127.0.0.1"
+  },
+  "engines": {
+    "node": ">=22"
+  }
 }
