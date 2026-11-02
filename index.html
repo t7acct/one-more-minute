@@ -25,13 +25,16 @@
         <div class="walk-actions"><button type="button" id="example" disabled>Try another pair <span aria-hidden="true">↻</span></button><button type="button" id="share" disabled>Copy walk link</button></div>
         <p id="share-status" role="status" class="help"></p>
         <div id="manual-share" hidden><label for="share-link">Copy this link to send your walk</label><input id="share-link" type="text" readonly></div>
+        <button id="show-map" type="button" class="text-button mobile-map-link">Show the walk on the map ↓</button>
       </form>
       <section class="result" aria-live="polite" aria-atomic="true"><p id="status">Loading the streets of Bloomsbury…</p><div id="result" hidden><p class="result-label">Your walk together</p><p class="shared"><span id="shared">0</span> <span class="unit">min</span></p><p id="goodbye"></p><div class="journeys"><p><span class="dot person-a"></span> You <strong id="time-a"></strong><small id="extra-a"></small></p><p><span class="dot person-b"></span> Your friend <strong id="time-b"></strong><small id="extra-b"></small></p></div><p class="gain" id="gain"></p></div></section>
       <details><summary>How does it work?</summary><p>We try street junctions as goodbye points, using shortest paths to get there and to each destination. We choose the candidate with the most shared walking that fits both time limits, without backtracking loops.</p><p>Times assume a steady 4.9 km/h. This is a small map experiment: crossings, opening hours, accessibility and live closures aren’t modelled. Use it to explore an idea, rather than for turn-by-turn navigation.</p></details>
     </section>
     <section class="map-panel" aria-label="Walking route map">
       <div class="map-top"><span><span class="live-dot"></span> Bloomsbury & surrounding streets</span><button id="reset" type="button">Fit route</button></div>
-      <svg id="map" viewBox="0 0 1000 900" role="img" aria-labelledby="map-title map-desc"><title id="map-title">Shared walking route in central London</title><desc id="map-desc">Loading street map.</desc><g id="streets"></g><g id="labels"></g><g id="routes"></g><g id="markers"></g></svg>
+      <svg id="map" viewBox="0 0 1000 900" tabindex="0" role="img" aria-labelledby="map-title map-desc" aria-describedby="map-help"><title id="map-title">Shared walking route in central London</title><desc id="map-desc">Loading street map.</desc><g id="streets"></g><g id="labels"></g><g id="routes"></g><g id="markers"></g></svg>
+      <div class="map-zoom" role="group" aria-label="Map zoom"><button id="zoom-in" type="button" aria-label="Zoom in">+</button><button id="zoom-out" type="button" aria-label="Zoom out">−</button></div>
+      <p id="map-help" class="map-help">Drag to move. Use + / − to zoom, or arrow keys when the map has focus. Press 0 to fit your route.</p>
       <div class="map-bottom"><div class="legend"><span><i class="line together"></i> Together</span><span><i class="line you"></i> You</span><span><i class="line friend"></i> Your friend</span></div><p>Map data © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a> · ODbL</p></div>
     </section>
   </main>

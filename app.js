@@ -1,6 +1,7 @@
 import { buildGraph, dijkstra, nearestNode, planWalk } from './routing.js';
 import { places } from './places.js';
 import { readWalk, walkHash } from './walk-state.js';
+import { setupMapControls } from './map-controls.js';
 
 const $ = id => document.getElementById(id);
 const NS = 'http://www.w3.org/2000/svg';
@@ -145,6 +146,11 @@ async function init() {
       $('start').value = 'ucl'; $('a').value = pair[0]; $('b').value = pair[1]; $('budget').value = 5; $('budget-b').value = 5; render();
     });
     $('reset').addEventListener('click', fitRoute);
+    setupMapControls($('map'), fitRoute);
+    $('show-map').addEventListener('click', () => {
+      document.querySelector('.map-panel').scrollIntoView({ behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth', block: 'start' });
+      $('map').focus({ preventScroll: true });
+    });
     $('share').addEventListener('click', async () => {
       const url = location.href;
       try {
